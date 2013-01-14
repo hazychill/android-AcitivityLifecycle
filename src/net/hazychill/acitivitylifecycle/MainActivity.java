@@ -2,6 +2,7 @@ package net.hazychill.acitivitylifecycle;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+	private static final String STATE_MESSAGES = "messages";
 	private StringBuffer messages;
 
 	public MainActivity() {
@@ -71,12 +73,37 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		updateMessage("onSaveInstanceState");
+		outState.putString(STATE_MESSAGES, messages.toString());
+
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		messages.append(savedInstanceState.getString(STATE_MESSAGES));
+
+		updateMessage("onRestoreInstanceState");
+
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
 	private void updateMessage(String event) {
 		String message = getMessages(event);
 		messages.append(message).append("\n");
 
 		TextView messageView = (TextView) findViewById(R.id.message);
 		if (messageView != null) {
+			String[] array = messages.toString().split("\n");
+			Arrays.sort(array);
+			messages.setLength(0);
+			for (String m : array) {
+				if (m.length() >= 1) {
+					messages.append(m).append("\n");
+				}
+			}
 			messageView.setText(messages.toString());
 		}
 	}
